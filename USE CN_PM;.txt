@@ -1,0 +1,51 @@
+USE CN_PM;
+
+-- Bảng người dùng
+CREATE TABLE nguoidung (
+    id_nguoidung INT PRIMARY KEY AUTO_INCREMENT,
+    email VARCHAR(100) UNIQUE NOT NULL,
+    user VARCHAR(50) NOT NULL,
+    pass VARCHAR(100) NOT NULL,
+    numberphone VARCHAR(15) NOT NULL
+);
+
+-- Bảng thông tin người dùng bổ sung
+CREATE TABLE thongtinnguoidung (
+    id_nguoidung INT PRIMARY KEY,
+    email VARCHAR(100) NOT NULL,
+    nbphonel VARCHAR(15),
+    FOREIGN KEY (id_nguoidung) REFERENCES nguoidung(id_nguoidung)
+);
+
+-- Bảng loại sản phẩm
+CREATE TABLE loaisanpham (
+    id_loaisp INT PRIMARY KEY AUTO_INCREMENT,
+    tenloaisp VARCHAR(100) NOT NULL,
+    hinhloaisp VARCHAR(255)
+);
+
+-- Bảng sản phẩm mới
+CREATE TABLE sanpham_moi (
+    id_spmoi INT PRIMARY KEY AUTO_INCREMENT,
+    ten_spmoi VARCHAR(100) NOT NULL,
+    hinh_spmoi VARCHAR(255),
+    gia_spmoi int NOT NULL,
+    mota TEXT,
+    id_loaisp INT,
+    FOREIGN KEY (id_loaisp) REFERENCES loaisanpham(id_loaisp)
+);
+
+-- Bảng đơn hàng
+CREATE TABLE donhang (
+    id_donhang INT PRIMARY KEY AUTO_INCREMENT,
+    id_nguoidung INT,
+    soluongct INT,
+    tongtien int,
+    emailnd VARCHAR(255),
+    sodienthoai VARCHAR(255),
+    trangthai INT,
+    diachi VARCHAR(255),
+    chitiet TEXT,
+    FOREIGN KEY (id_nguoidung) REFERENCES nguoidung(id_nguoidung),
+    FOREIGN KEY (id_spmoi) REFERENCES sanpham_moi(id_spmoi)
+);

@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Quản lý Người dùng</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+    }
+    .container {
+      display: grid;
+      grid-template-columns: 250px 1fr; /* Chia 2 cột: 1 cột cố định 250px và 1 cột chiếm phần còn lại */
+      gap: 20px;
+      width: 100%;
+      height: 100vh;
+      padding: 20px;
+    }
+    .sidebar {
+      background-color: #f1f1f1;
+      padding: 10px;
+      border-radius: 5px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    .content {
+      background-color: #f9f9f9;
+      padding: 20px;
+      border-radius: 5px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      overflow-y: auto;
+    }
+    button {
+      padding: 10px;
+      margin: 5px;
+      border-radius: 5px;
+      background-color: #3498db;
+      color: white;
+      border: none;
+      cursor: pointer;
+      width: 100%;
+    }
+    button:hover {
+      background-color: #2980b9;
+    }
+    #user-info {
+      margin-top: 20px;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); /* Tự động tạo các cột người dùng */
+      gap: 20px;
+      overflow-y: auto;
+    }
+    .user-card {
+      padding: 10px;
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      text-align: center;
+      border: 1px solid #ccc;
+    }
+    .user-card img {
+      width: 100%;
+      height: auto;
+      margin-bottom: 10px;
+    }
+    .user-card strong {
+      display: block;
+      margin-bottom: 10px;
+    }
+    .sidebar input, .sidebar button {
+      margin-bottom: 10px;
+      padding: 10px;
+      width: 100%;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Sidebar: Các nút điều hướng và form thêm/sửa/xóa người dùng -->
+    <div class="sidebar">
+      <h2>👤 Quản lý người dùng</h2>
+      <button onclick="showAllUsers()">Hiển thị người dùng</button>
+      <input type="text" id="user-id" placeholder="ID Người dùng">
+      <input type="text" id="user-name" placeholder="Tên người dùng">
+      <input type="text" id="user-email" placeholder="Email">
+      <input type="text" id="user-phone" placeholder="Số điện thoại">
+      <button onclick="addUser()">➕ Thêm người dùng</button>
+      <button onclick="updateUser()">🔄 Cập nhật người dùng</button>
+      <button onclick="deleteUser()">❌ Xoá người dùng</button>
+    </div>
+
+    <!-- Nội dung: Danh sách người dùng -->
+    <div class="content">
+      <div id="user-info"></div>
+    </div>
+  </div>
+
+  <script>
+    let currentIndex = null;
+
+    function renderUserInfo(htmlContent) {
+      document.getElementById('user-info').innerHTML = htmlContent;
+    }
+
+    async function fetchAndShowUsers() {
+      try {
+        const response = await fetch('http://localhost:8081/PHP/getnguoidung2.php');
+        const users = await response.json();
+
+        if (!Array.isArray(users)) {
+          throw new Error("Dữ liệu trả về không đúng định dạng.");
+        }
+
+        let html = '';
+
+        users.forEach(u => {
+          html += 
+            `<div class="user-card">
+              <strong>Name: ${u.user}</strong><br>
+              <span>ID: ${u.id_nguoidung}</span><br>
+              <span>Email: ${u.email}</span><br>
+              <span>Số điện thoại: ${u.numberphone}</span><br>
+            </div>`;
+        });
+
+        renderUserInfo(html);
+
+      } catch (error) {
+        renderUserInfo(`<p style="color: red;">❌ Lỗi khi tải người dùng: ${error.message}</p>`);
+      }
+    }
+
+    function showAllUsers() {
+      fetchAndShowUsers();
+    }
+
+    function addUser() {
+      alert("👉 Tính năng thêm người dùng đang được phát triển.");
+    }
+
+    function updateUser() {
+      alert("👉 Tính năng cập nhật người dùng đang được phát triển.");
+    }
+
+    function deleteUser() {
+      alert("👉 Tính năng xoá người dùng đang được phát triển.");
+    }
+  </script>
+</body>
+</html>

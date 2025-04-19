@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Quản lý Đơn hàng</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+    }
+    .container {
+      display: grid;
+      grid-template-columns: 250px 1fr;
+      gap: 20px;
+      width: 100%;
+      height: 100vh;
+      padding: 20px;
+    }
+    .sidebar {
+      background-color: #f1f1f1;
+      padding: 10px;
+      border-radius: 5px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    .content {
+      background-color: #f9f9f9;
+      padding: 20px;
+      border-radius: 5px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      overflow-y: auto;
+    }
+    button {
+      padding: 10px;
+      margin: 5px;
+      border-radius: 5px;
+      background-color: #3498db;
+      color: white;
+      border: none;
+      cursor: pointer;
+      width: 100%;
+    }
+    button:hover {
+      background-color: #2980b9;
+    }
+    #order-info {
+      margin-top: 20px;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 20px;
+    }
+    .order-card {
+      padding: 10px;
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      text-align: center;
+      border: 1px solid #ccc;
+    }
+    .sidebar input, .sidebar button {
+      margin-bottom: 10px;
+      padding: 10px;
+      width: 100%;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Sidebar: điều khiển -->
+    <div class="sidebar">
+      <h2>📦 Quản lý đơn hàng</h2>
+      <button onclick="showAllOrders()">Hiển thị đơn hàng</button>
+      <input type="text" id="user-id" placeholder="ID Người dùng"> <!-- mới -->
+      <input type="text" id="order-status" placeholder="Trạng thái (0: Đợi, 1: Giao, 2: Xong)"> <!-- mới -->
+
+     
+      <button onclick="updateOrder()">🔄 Cập nhật trạng thái</button>
+   
+    </div>
+
+    <!-- Nội dung chính -->
+    <div class="content">
+      <div id="order-info"></div>
+    </div>
+  </div>
+
+  <script>
+    function getTrangThai(code) {
+  switch (code) {
+    case "0":
+    case 0:
+      return "⏳ Đợi xử lý";
+    case "1":
+    case 1:
+      return "🚚 Đang giao";
+    case "2":
+    case 2:
+      return "✅ Đã xong";
+    default:
+      return "❓ Không rõ";
+  }
+}
+
+    function renderOrderInfo(htmlContent) {
+      document.getElementById('order-info').innerHTML = htmlContent;
+    }
+
+    async function fetchAndShowOrders() {
+  try {
+    const response = await fetch('http://localhost:8081/PHP/getdonhang2.php');
+    const orders = await response.json();
+
+    if (!Array.isArray(orders)) {
+      throw new Error("Dữ liệu trả về không đúng định dạng.");
+    }
+
+    let html = '';
+
+    orders.forEach(order => {
+      let productNamesText = 'Không có dữ liệu';
+
+      try {
+        const products = JSON.parse(order.chitiet); // Giả sử 'chitiet' là JSON string
+        const productNames = products.map(product => product.ten_sp);
+        productNamesText = productNames.join(', ');
+      } catch (e) {
+        productNamesText = '❌ Lỗi phân tích sản phẩm';
+      }
+
+      html += 
+        `<div class="order-card">
+          <strong>Khách hàng: ${order.user}</strong><br>
+          <span>ID Khách hàng: ${order.id_nguoidung}</span><br>
+          <span>ID Đơn hàng: ${order.id_donhang}</span><br>
+          <span>Tên sản phẩm: ${productNamesText}</span><br>
+          <span>Tổng tiền: ${order.tongtien}</span><br>
+          <span>Trạng thái: ${getTrangThai(order.trangthai)}</span><br>
+          <span>Số điện thoại khách: ${order.numberphone}</span><br>
+        </div>`;
+    });
+
+    renderOrderInfo(html);
+
+  } catch (error) {
+    renderOrderInfo(`<p style="color: red;">❌ Lỗi khi tải đơn hàng: ${error.message}</p>`);
+  }
+}
+
+
+    function showAllOrders() {
+      fetchAndShowOrders();
+    }
+
+    async function updateOrder() {
+  const idNguoiDung = document.getElementById("user-id").value.trim();
+  const trangThai = document.getElementById("order-status").value.trim();
+
+  if (!idNguoiDung || !trangThai) {
+    alert("❗ Vui lòng nhập đầy đủ ID người dùng và trạng thái.");
+    return;
+  }
+
+  try {
+    const response = await fetch("http://localhost:8081/PHP/update_donhang.php", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        id_donhang: parseInt(idNguoiDung),
+        trangthai: parseInt(trangThai)
+      })
+    });
+
+    const result = await response.json();
+
+    if (result.status === "success") {
+      alert("✅ Đã cập nhật trạng thái đơn hàng.");
+      fetchAndShowOrders(); // Reload lại danh sách đơn hàng
+    } else {
+      alert("❌ Lỗi cập nhật: " + result.message);
+    }
+  } catch (error) {
+    alert("❌ Lỗi gửi yêu cầu: " + error.message);
+  }
+}
+
+
+
+  </script>
+</body>
+</html>

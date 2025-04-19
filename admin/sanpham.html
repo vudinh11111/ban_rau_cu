@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Quản lý Sản phẩm</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+    }
+    .container {
+      display: grid;
+      grid-template-columns: 250px 1fr; /* Chia 2 cột: 1 cột cố định 250px và 1 cột chiếm phần còn lại */
+      gap: 20px;
+      width: 100%;
+      height: 100vh;
+      padding: 20px;
+    }
+    .sidebar {
+      background-color: #f1f1f1;
+      padding: 10px;
+      border-radius: 5px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    .content {
+      background-color: #f9f9f9;
+      padding: 20px;
+      border-radius: 5px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      overflow-y: auto;
+    }
+    button {
+      padding: 10px;
+      margin: 5px;
+      border-radius: 5px;
+      background-color: #3498db;
+      color: white;
+      border: none;
+      cursor: pointer;
+      width: 100%;
+    }
+    button:hover {
+      background-color: #2980b9;
+    }
+    #product-info {
+      margin-top: 20px;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); /* Tự động tạo các cột sản phẩm */
+      gap: 20px;
+      overflow-y: auto;
+    }
+    .product-card {
+      padding: 10px;
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      text-align: center;
+      border: 1px solid #ccc;
+    }
+    .product-card img {
+      width: 100%;
+      height: auto;
+      margin-bottom: 10px;
+    }
+    .product-card strong {
+      display: block;
+      margin-bottom: 10px;
+    }
+    .sidebar input, .sidebar button {
+      margin-bottom: 10px;
+      padding: 10px;
+      width: 100%;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Sidebar: Các nút điều hướng và form thêm/sửa/xóa sản phẩm -->
+    <div class="sidebar">
+      <h2>🛒 Quản lý sản phẩm</h2>
+      <button onclick="showAllProducts()">Hiển thị sản phẩm</button>
+      <input type="text" id="product-name" placeholder="ID">
+      <input type="text" id="product-name" placeholder="Tên sản phẩm">
+      <input type="text" id="product-type"  placeholder="ID loại sản phẩm"">
+      <input type="text" id="product-price" placeholder="Giá sản phẩm">
+      <input type="text" id="product-description" placeholder="Mô tả sản phẩm">
+      <input type="text" id="product-image"  placeholder="Ảnh minh họa"">
+      <button onclick="addProduct()">➕ Thêm sản phẩm</button>
+      <button onclick="updateProduct()">🔄 Cập nhật sản phẩm</button>
+      <button onclick="deleteProduct()">❌ Xoá sản phẩm</button>
+    </div>
+
+    <!-- Nội dung: Danh sách sản phẩm -->
+    <div class="content">
+      <div id="product-info"></div>
+    </div>
+  </div>
+
+  <script>
+    let currentIndex = null;
+
+    function renderProductInfo(htmlContent) {
+      document.getElementById('product-info').innerHTML = htmlContent;
+    }
+
+    async function fetchAndShowProducts() {
+      try {
+        const response = await fetch('http://localhost:8081/PHP/getsanphammoi.php');
+        const products = await response.json();
+
+        if (!Array.isArray(products)) {
+          throw new Error("Dữ liệu trả về không đúng định dạng.");
+        }
+
+        let html = '';
+
+        products.forEach(p => {
+          html += `
+            <div class="product-card">
+             <strong>${p.ten_spmoi}</strong><br>
+             <span>ID: ${p.id_spmoi}</span>
+              <img src="${p.hinh_spmoi}" alt="${p.ten_spmoi}">
+              <p>Giá: ${p.gia_spmoi} VNĐ</p>
+              <p>Mô tả: ${p.mota}</p>
+            </div>
+          `;
+        });
+
+        renderProductInfo(html);
+
+      } catch (error) {
+        renderProductInfo(`<p style="color: red;">❌ Lỗi khi tải sản phẩm: ${error.message}</p>`);
+      }
+    }
+
+    function showAllProducts() {
+      fetchAndShowProducts();
+    }
+
+    function addProduct() {
+      alert("👉 Tính năng cập nhật sản phẩm đang được phát triển.");
+    }
+    function updateProduct() {
+      alert("👉 Tính năng cập nhật sản phẩm đang được phát triển.");
+    }
+
+    function deleteProduct() {
+      alert("👉 Tính năng xoá sản phẩm đang được phát triển.");
+    }
+
+    function submitProduct() {
+      const name = document.getElementById('product-name').value;
+      const price = document.getElementById('product-price').value;
+      const description = document.getElementById('product-description').value;
+      const image = document.getElementById('product-image').files[0];
+
+      if (!name || !price || !description || !image) {
+        alert("Vui lòng điền đầy đủ thông tin sản phẩm.");
+        return;
+      }
+
+      // Thực hiện gửi dữ liệu thêm sản phẩm (Ví dụ: sử dụng Fetch API để gửi yêu cầu POST)
+      const formData = new FormData();
+      formData.append("name", name);
+      formData.append("price", price);
+      formData.append("description", description);
+      formData.append("image", image);
+
+      fetch('http://localhost:8081/PHP/add_product.php', {
+        method: 'POST',
+        body: formData
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          alert("Sản phẩm đã được thêm!");
+          showAllProducts(); // Hiển thị lại danh sách sản phẩm
+        } else {
+          alert("Có lỗi xảy ra khi thêm sản phẩm.");
+        }
+      })
+      .catch(error => {
+        console.error("Lỗi:", error);
+        alert("Có lỗi xảy ra khi thêm sản phẩm.");
+      });
+    }
+  </script>
+</body>
+</html>

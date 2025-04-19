@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Quản lý Đơn hàng</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+    }
+    .container {
+      display: grid;
+      grid-template-columns: 250px 1fr;
+      gap: 20px;
+      width: 100%;
+      height: 100vh;
+      padding: 20px;
+    }
+    .sidebar {
+      background-color: #f1f1f1;
+      padding: 10px;
+      border-radius: 5px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    .content {
+      background-color: #f9f9f9;
+      padding: 20px;
+      border-radius: 5px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      overflow-y: auto;
+    }
+    button {
+      padding: 10px;
+      margin: 5px;
+      border-radius: 5px;
+      background-color: #3498db;
+      color: white;
+      border: none;
+      cursor: pointer;
+      width: 100%;
+    }
+    button:hover {
+      background-color: #2980b9;
+    }
+    #order-info {
+      margin-top: 20px;
+    }
+    .product-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+    .order-card {
+      padding: 20px;
+      font-size: 16px;
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      border: 1px solid #ccc;
+      width: 250px;
+    }
+    .order-card img {
+      width: 100%;
+      height: auto;
+      border-radius: 6px;
+      margin-bottom: 10px;
+    }
+    .order-card h3 {
+      font-size: 18px;
+      margin: 10px 0 5px;
+    }
+    .order-card p {
+      margin: 5px 0;
+    }
+    .total-revenue {
+      margin-top: 30px;
+      padding: 20px;
+      background-color: #fff;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      text-align: center;
+      font-size: 20px;
+      color: green;
+      font-weight: bold;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <h2>📦 Quản lý doanh thu</h2>
+      <button onclick="showRevenue()">Hiển thị sản phẩm đã bán</button>
+    </div>
+
+    <!-- Content -->
+    <div class="content">
+      <div id="order-info"></div>
+    </div>
+  </div>
+
+  <script>
+    function renderOrderInfo(productsHtml, totalRevenue) {
+      const container = `
+        <div class="product-list">${productsHtml}</div>
+        <div class="total-revenue">Tổng doanh thu: ${Number(totalRevenue).toLocaleString()} VND</div>
+      `;
+      document.getElementById('order-info').innerHTML = container;
+    }
+
+    async function fetchAndShowRevenue() {
+      try {
+        const response = await fetch('http://localhost:8081/PHP/doanhthu.php');
+        const data = await response.json();
+
+        if (!Array.isArray(data)) {
+          throw new Error("Dữ liệu trả về không hợp lệ.");
+        }
+
+        let html = "";
+        let tongDoanhThu = 0;
+
+        data.forEach(sp => {
+          tongDoanhThu += parseFloat(sp.tong_doanhthu);
+          html += `
+            <div class="order-card">
+            
+             
+              <p>Đã bán: ${sp.tong_soluong} cái</p>
+              <p><strong>Doanh thu: ${Number(sp.tong_doanhthu).toLocaleString()} VND</strong></p>
+            </div>
+          `;
+        });
+
+        renderOrderInfo(html, tongDoanhThu);
+
+      } catch (error) {
+        document.getElementById('order-info').innerHTML = `<p style="color: red;">❌ Lỗi khi tải dữ liệu: ${error.message}</p>`;
+      }
+    }
+
+    function showRevenue() {
+      fetchAndShowRevenue();
+    }
+  </script>
+</body>
+</html>
